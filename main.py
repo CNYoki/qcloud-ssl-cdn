@@ -210,4 +210,4 @@ if __name__ == "__main__":
 
         # 对腾讯云EO的支持
         if config.ZONE_ID:
-            run_config_teo(SECRETID, SECRETKEY, config.ZONE_ID, my_domain, cert_id)
+            run_config_teo(SECRETID, SECRETKEY, config.ZONE_ID, config.EO_HOST, cert_id)

@@ -187,27 +187,39 @@ def run_config_teo(id, key, zoneid, host, cert_id):
 if __name__ == "__main__":
     SECRETID = config.SECRETID
     SECRETKEY = config.SECRETKEY
+    CERT = config.CER_FILE
+    CERTKEY = config.KEY_FILE
+
+    # 对CERT进行hash计算，比较是否发生变化
+    with open(config.CERT_HASH_FILE, 'r') as f:
+        cert_hash = f.read()
+    certhash_current = tools.hash_file(CERT)
+    if cert_hash == certhash_current:
+        exit("证书文件没有发生变化，不进行操作")
+
     # 泛域名证书
     if config.UPLOAD_SSL:
-        cert_id = run_config_ssl(SECRETID, SECRETKEY, config.CER_FILE, config.KEY_FILE)
+        cert_id = run_config_ssl(SECRETID, SECRETKEY, CERT, CERTKEY)
+        with open(config.CERT_HASH_FILE, 'w') as f:
+            f.write(certhash_current)
     else:
         cert_id = config.CERT_ID
-    for my_domain in config.CDN_DOMAIN:
+    # for my_domain in config.CDN_DOMAIN:
+    #
+    #     if config.UPDATE_SSL:
+    #         run_config_cdn(SECRETID, SECRETKEY, my_domain, cert_id)
+    #     if config.ENABLE_HSTS or config.ENABLE_OCSP or config.ENABLE_HTTP2:
+    #         https_options_enabler(SECRETID, SECRETKEY, my_domain, config.ENABLE_HTTP2, config.ENABLE_HSTS,
+    #                               config.HSTS_TIMEOUT_AGE, config.HSTS_INCLUDE_SUBDOMAIN, config.ENABLE_OCSP)
+    #     if config.DELETE_OLD_CERTS:
+    #         delete_old_ssls(SECRETID, SECRETKEY, my_domain, cert_id)
+    #     if config.PUSH_URL:
+    #         run_url_push(SECRETID, SECRETKEY, my_domain, config.URLS_FILE)
+    #     if config.PURGE_URL:
+    #         run_purge_url(SECRETID, SECRETKEY, my_domain, config.URLS_FILE)
+    #     # ecdn是全球加速服务，与CDN不同，本账号没有开通该功能
+    #     # run_config_ecdn(SECRETID, SECRETKEY, my_domain, cert_id)
 
-        if config.UPDATE_SSL:
-            run_config_cdn(SECRETID, SECRETKEY, my_domain, cert_id)
-        if config.ENABLE_HSTS or config.ENABLE_OCSP or config.ENABLE_HTTP2:
-            https_options_enabler(SECRETID, SECRETKEY, my_domain, config.ENABLE_HTTP2, config.ENABLE_HSTS,
-                                  config.HSTS_TIMEOUT_AGE, config.HSTS_INCLUDE_SUBDOMAIN, config.ENABLE_OCSP)
-        if config.DELETE_OLD_CERTS:
-            delete_old_ssls(SECRETID, SECRETKEY, my_domain, cert_id)
-        if config.PUSH_URL:
-            run_url_push(SECRETID, SECRETKEY, my_domain, config.URLS_FILE)
-        if config.PURGE_URL:
-            run_purge_url(SECRETID, SECRETKEY, my_domain, config.URLS_FILE)
-        # ecdn是全球加速服务，与CDN不同，本账号没有开通该功能
-        # run_config_ecdn(SECRETID, SECRETKEY, my_domain, cert_id)
-
-        # 对腾讯云EO的支持
-        if config.ZONE_ID:
-            run_config_teo(SECRETID, SECRETKEY, config.ZONE_ID, my_domain, cert_id)
+    # 对腾讯云EO的支持
+    if config.ZONE_ID:
+        run_config_teo(SECRETID, SECRETKEY, config.ZONE_ID, config.EO_HOST, cert_id)

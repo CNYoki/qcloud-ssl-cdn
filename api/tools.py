@@ -1,7 +1,5 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-# author: 'zfb'
-# time: 2020-12-02 15:45
+import hashlib
+
 
 def read_file(name):
     '''读取文件内容
@@ -83,3 +81,12 @@ def generate_https(https):
     res["ClientCertInfo"] = client_cert
     res["Hsts"] = https.Hsts
     return res
+
+
+def hash_file(file_path):
+    sha256_hash = hashlib.sha256()
+    with open(file_path,"rb") as f:
+        # Read and update hash in chunks of 4K
+        for byte_block in iter(lambda: f.read(4096),b""):
+            sha256_hash.update(byte_block)
+    return sha256_hash.hexdigest()
